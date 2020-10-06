@@ -1,37 +1,73 @@
-package com.github.sousacruz;
+package com.github.sousacruz.domain;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.sousacruz.exception.BeyondTheEdgesException;
+import com.github.sousacruz.exception.CardNoDataFoundException;
+
+/**
+ * 
+ * @author herbert.cruz
+ *
+ */
 public class Card {
 	
 	private final int CARRIAGE_RETURN = 13;
 	private final int LINE_FEED = 10;
 	
-	private Map<String,Boolean> card = new HashMap<String,Boolean>();
+	private Map<String,Boolean> card;
 	
-	Card() {}
+    /**
+     * Creates a card that have no data yet.
+     *
+     * <p> You can load data lately using
+     * <code>{@link Card#loadData(String) loadData}</code> method.
+     * 
+     */
+	public Card() {
+		this(null);
+	}
 	
-	Card(String dataFile) {
+    /**
+     * Creates a card with a initial data.
+     *
+     * <p> You can load data lately using
+     * 
+     * @param  dataFile	the full name of a text file in UTF-8 format with card data 
+     *
+     * @exception  IOException  If {@code dataFile == null}
+     */
+	public Card(String dataFile) {
 		try {
-			this.loadCard(dataFile);
+			this.loadData(dataFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public Map<String, Boolean> getCard() {
-		return Collections.unmodifiableMap(this.card);
+		return this.card;
 	}
 	
-	public void loadCard(String dataFile) throws IOException {
-        
+    /**
+     * Loads a card data from a informed text file.
+     *
+     * @param  dataFile	the full name of a text file in UTF-8 format with card data 
+     *
+     * @exception  IOException  If {@code dataFile == null}
+     * @exception  UnsupportedEncodingException  If {@code dataFile == null}
+     */
+	public void loadData(String dataFile) throws IOException {
+		this.card = new HashMap<String,Boolean>();
+		
+		// if (Optional.of(dataFile).isPresent())
+
 		try (BufferedReader reader = new BufferedReader(new FileReader(dataFile, StandardCharsets.UTF_8))) {
         	int codePoint;
         	int coordinateX = 0;
@@ -58,21 +94,21 @@ public class Card {
         	}
         
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException("The map text file must be in UTF-8 format");
+			throw new UnsupportedEncodingException("The map text file must be in UTF-8 format. "+e.getMessage());
 		}
 
 	}
 
 	public boolean canMoveTo(String position) {
-		if (this.card.size() == 0) {
-			throw new RuntimeException("This card have no data yet!");
+		if ((this.card == null) || (this.card.isEmpty())) {
+			throw new CardNoDataFoundException("This card have no data yet!");
 		}
 		Boolean isValid = this.card.get(position);
 		
 		if (isValid != null) {
 			return isValid.booleanValue();
 		} else {
-			throw new RuntimeException("The hero cannot go beyond the edges of the map.");
+			throw new BeyondTheEdgesException(position);
 		}
 	}
 	
