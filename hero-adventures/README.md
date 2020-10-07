@@ -53,11 +53,6 @@ The movements of the hero are defined by a file with the following characteristi
 ## Before you begin
 
 In order to execute this project you will need to do.
-
-
-## Before you begin
-
-In order to execute this project you will need to do.
 1.  Clone this repository
 2.  Download a sample [card.txt](https://github.com/sousacruz/exercicios/blob/master/hero-adventures/src/main/resources/data/card.txt) file.
 3.  Download a sample [input.txt](https://github.com/sousacruz/exercicios/blob/master/hero-adventures/src/main/resources/data/inputs.txt) file.
