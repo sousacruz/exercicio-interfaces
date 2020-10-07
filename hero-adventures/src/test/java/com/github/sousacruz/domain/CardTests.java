@@ -8,9 +8,13 @@ import org.junit.jupiter.api.Test;
 import com.github.sousacruz.exception.BeyondTheEdgesException;
 import com.github.sousacruz.exception.CardNoDataFoundException;
 
+/**
+ * Tests rules and overriding data load of class Card.
+ * 
+ * @author herbert.cruz
+ *
+ */
 class CardTests {
-
-	private final Card card = new Card("c:/tmp/card.txt");
 
 	@Test
 	void cardMustBeReplacedWithNewDataAfterMultipleLoads() throws IOException {
@@ -31,6 +35,8 @@ class CardTests {
 	void positionShouldBeInsideTheEdges() {
 		Assertions.assertThrows(BeyondTheEdgesException.class, () -> {
 			String invalidPosition = "21.28"; // Beyond the edges
+			String cardFile = "c:/tmp/card.txt";
+			Card card = new Card(cardFile);
 			card.canMoveTo(invalidPosition);
 		});
 	}
