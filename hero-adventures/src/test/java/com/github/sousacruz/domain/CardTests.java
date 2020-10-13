@@ -23,21 +23,20 @@ class CardTests {
 
 		String fileWithSizeOf400 = "c:/tmp/card-data-size-20x20.txt";
 		cardToLoad.loadData(fileWithSizeOf400);
-		Assertions.assertEquals(400, cardToLoad.getCard().size());
+		Assertions.assertEquals(20, cardToLoad.getCard().length);
 
 		String fileWithSizeOf300 = "c:/tmp/card-data-size-30x10.txt";
 		cardToLoad.loadData(fileWithSizeOf300);
-		Assertions.assertEquals(300, cardToLoad.getCard().size());
+		Assertions.assertEquals(10, cardToLoad.getCard().length);
 	}
 	
 	
 	@Test
 	void positionShouldBeInsideTheEdges() {
 		Assertions.assertThrows(BeyondTheEdgesException.class, () -> {
-			String invalidPosition = "21.28"; // Beyond the edges
 			String cardFile = "c:/tmp/card.txt";
 			Card card = new Card(cardFile);
-			card.canMoveTo(invalidPosition);
+			card.canMoveTo(21, 28);
 		});
 	}
 	
@@ -45,8 +44,7 @@ class CardTests {
 	void cannotMoveWithoutMap() {
 		Assertions.assertThrows(CardNoDataFoundException.class, () -> {
 			Card cardToLoad = new Card();
-			String position = "3.0"; 
-			cardToLoad.canMoveTo(position);
+			cardToLoad.canMoveTo(3, 0);
 		});
 	}
 	

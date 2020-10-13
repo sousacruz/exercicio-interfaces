@@ -12,7 +12,8 @@ import com.github.sousacruz.domain.Adventure;
 public class Adventures {
 	
 	public static final int X = 0;
-	public static final int Y = 1;	
+	public static final int Y = 1;
+	public static final int IMPENETRABLE_WOODS = 35;
 	
 	public static List<Adventure> loadAventures(String adventureFile) throws FileNotFoundException {
 		List<Adventure> adventures = new ArrayList<>();

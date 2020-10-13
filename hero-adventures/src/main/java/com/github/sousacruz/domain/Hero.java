@@ -3,7 +3,6 @@ package com.github.sousacruz.domain;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 import com.github.sousacruz.exception.ImpenetrableWoodsException;
 import com.github.sousacruz.exception.UnsupportedDisplacement;
@@ -36,7 +35,7 @@ public class Hero {
 	public Hero(Card card, List<Adventure> adventures) {
 		this.card = card;
 		this.adventures = adventures;
-		if (Objects.nonNull(this.adventures)) {
+		if (this.adventures != null) {
 			this.iterAdventures = adventures.iterator();
 		}
 	}
@@ -53,8 +52,8 @@ public class Hero {
 		this.coordinates = coordinates;
 	}
 
-	public boolean hasNext() {
-		if (Objects.nonNull(iterAdventures)) {
+	public boolean hasAdventure() {
+		if (iterAdventures != null) {
 			return iterAdventures.hasNext();
 		} else {
 			return false;
@@ -73,19 +72,15 @@ public class Hero {
 	 */
 	public String faceNextAdventure() throws UnsupportedDisplacement {
 
-		String finalPosition = null;
-		if (Objects.nonNull(iterAdventures)) {
+		if ((iterAdventures != null) && (iterAdventures.hasNext())) {
+			Adventure adventure = iterAdventures.next();
+			this.setCoordinates(adventure.getInitialCoordinates());
+			this.moveTo(adventure.getMovements());
 
-			if (iterAdventures.hasNext()) {
-				Adventure adventure = iterAdventures.next();
-				this.setCoordinates(adventure.getInitialCoordinates());
-				this.moveTo(adventure.getMovements());
-
-				finalPosition = String.format("The hero must finish at (%s)", this.coordinatesToString());
-			}
+			return String.format("The hero must finish at (%s)", this.coordinatesToString());
 		}
 
-		return finalPosition;
+		return null;
 	}
 
 	/**
@@ -158,17 +153,15 @@ public class Hero {
 	 * @param coordinateY
 	 * 
 	 * @throws ImpenetrableWoodsException If
-	 *                                    {@code coordinates x,y leads to impenetrable woods position }
+	 *                   {@code coordinates x,y leads to impenetrable woods position}
 	 */
 	private void checkMovement(int coordinateX, int coordinateY) throws ImpenetrableWoodsException {
 
-		String position = String.format("%d.%d", coordinateX, coordinateY);
-
-		if (this.card.canMoveTo(position)) {
+		if (this.card.canMoveTo(coordinateX, coordinateY)) {
 			coordinates[X] = coordinateX;
 			coordinates[Y] = coordinateY;
 		} else {
-			throw new ImpenetrableWoodsException(position);
+			throw new ImpenetrableWoodsException(String.format("%d.%d", coordinateX, coordinateY));
 		}
 	}
 

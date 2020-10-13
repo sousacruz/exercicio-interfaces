@@ -3,13 +3,12 @@ package com.github.sousacruz.domain;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 import com.github.sousacruz.exception.BeyondTheEdgesException;
 import com.github.sousacruz.exception.CardNoDataFoundException;
+import com.github.sousacruz.util.Adventures;
 
 /**
  * Class for representing a map. The constructors of this class assume that the
@@ -19,10 +18,7 @@ import com.github.sousacruz.exception.CardNoDataFoundException;
  */
 public class Card {
 	
-	private final int CARRIAGE_RETURN = 13;
-	private final int LINE_FEED = 10;
-	
-	private Map<String,Boolean> card;
+	private char[][] card;
 	
     /**
      * Creates a card that have no data yet.
@@ -45,7 +41,7 @@ public class Card {
      * @exception  IOException  if its have any problem to access {@code dataFile}
      */
 	public Card(String dataFile) {
-		if (Objects.nonNull(dataFile)) {
+		if (dataFile != null) {
 			try {
 				this.loadData(dataFile);
 			} catch (IOException e) {
@@ -54,7 +50,7 @@ public class Card {
 		}
 	}
 	
-	public Map<String, Boolean> getCard() {
+	public char[][] getCard() {
 		return this.card;
 	}
 	
@@ -69,41 +65,23 @@ public class Card {
      * 					match to the expected format UTF-8.
      */
 	public void loadData(String dataFile) throws IOException {
-		this.card = new HashMap<String,Boolean>();
 		
-		if (Objects.nonNull(dataFile)) {
+		if (dataFile != null) {
 			
-			try (BufferedReader reader = new BufferedReader(new FileReader(dataFile))) {
-				int codePoint;
-				int coordinateX = 0;
-				int coordinateY = 0;
-				String specificPosition;
-				
-				while ((codePoint = reader.read()) >= 0) {
-					
-					if (codePoint != CARRIAGE_RETURN && codePoint != LINE_FEED) {
-						specificPosition = coordinateX + "." + coordinateY;						
-						// Now we put map text data into our HashMap,  
-						// indicating through which one the hero can move
-						this.card.put(specificPosition, Character.isWhitespace(codePoint));
-						coordinateX++;
-						
-					} else if (codePoint == CARRIAGE_RETURN) {
-						
-						// For each line, we must restart X counter and increment Y counter
-						// in order to represent our map correctly
-						coordinateX=0;
-						coordinateY++;
-					}
-				}
-				
-			} catch (UnsupportedEncodingException e) {
-				throw new UnsupportedEncodingException("The map text file must be in UTF-8 format. "+e.getMessage());
+			try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(dataFile))) {
+				lineNumberReader.skip(Long.MAX_VALUE);
+				int lines = lineNumberReader.getLineNumber() + 1;
+				this.card = new char[lines][];
 			}
 
+			try (BufferedReader reader = new BufferedReader(new FileReader(dataFile))) {
+				String line;
+				int coordinateY = 0;
+				while ((line = reader.readLine()) != null) {
+					this.card[coordinateY++] = line.toCharArray();
+				}
+			}
 		}
-
-
 	}
 
 	/**
@@ -111,28 +89,24 @@ public class Card {
 	 * the whether informed position corresponds to a box where the hero
 	 * can move. 
 	 * 
-	 * @param position	the coordinates to be validated against the map
+	 * @param coordinateX  the coordinate X to be validated against the map
 	 * 
+   	 * @param coordinateY  the coordinate Y to be validated against the map
+   	 * 
 	 * @return true 	when the informed position corresponds a space
 	 * 					character on the map
 	 * 
 	 * @exception CardNoDataFoundException	if the verification has 
 	 * 					called when card data was not loaded yet.
-	 * 
-	 * @exception BeyondTheEdgesException 	if the informed position
-	 * 					does not match with coordinates inside the map.
 	 */
-	public boolean canMoveTo(String position) {
-		if (Objects.isNull(this.card)) {
+	public boolean canMoveTo(int coordinateX, int coordinateY) {
+		if (this.card == null) {
 			throw new CardNoDataFoundException("This card have no data yet!");
 		}
-		Boolean isValid = this.card.get(position);
 		
-		if (isValid != null) {
-			return isValid.booleanValue();
-		} else {
-			throw new BeyondTheEdgesException(position);
+		if ((coordinateY > this.card.length) || (coordinateX > this.card[coordinateY].length)) {
+			throw new BeyondTheEdgesException(String.format("%d.%d", coordinateX, coordinateY));
 		}
+		return this.card[coordinateY][coordinateX] != Adventures.IMPENETRABLE_WOODS;
 	}
-	
 }
